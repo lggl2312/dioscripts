@@ -46,6 +46,8 @@ Flags.RaidColor = Color3.fromRGB(255, 14, 14)
 Flags.RaidAlpha = 1
 Flags.BulletThickness = 1
 Flags.FireRateMult = 1
+Flags.FovChanger = false
+Flags.FovValue = 70
 
 local FovCheckRow, SnaplineRow, CheaterDetectorRow
 local DropsRow, BodybagRow, WoolRow, TomatoRow, PumpkinRow, CornRow
@@ -519,7 +521,7 @@ end
 do
     local Esp = Win:Tab("ESP")
     local Left = Esp:Panel({ Side = "left", Tabs = { "Player", "Loot", "Plants" } })
-    local Right = Esp:Panel({ Side = "right", Tabs = { "Nodes", "Misc" } })
+    local Right = Esp:Panel({ Side = "right", Tabs = { "Nodes", "Misc", "Visuals" } })
 
     local PlayersPage = Left:Page("Player")
     PlayersPage:Toggle({ Name = "Armor Viewer",
@@ -603,6 +605,31 @@ do
         Callback = function(V)
             Flags.RaidEspDistance = V
         end })
+
+    local VisualsPage = Right:Page("Visuals")
+    VisualsPage:Toggle({ Name = "FOV Changer", Help = "Overrides the camera field of view.",
+        Callback = function(Bool)
+            Flags.FovChanger = Bool
+        end })
+    VisualsPage:Slider({ Name = "Field of View", Default = 70, Min = 30, Max = 120, Suffix = "°",
+        Callback = function(V)
+            Flags.FovValue = V
+        end })
+
+    local OriginalFov
+    RunService.RenderStepped:Connect(function()
+        local Camera = Workspace.CurrentCamera
+        if not Camera then
+            return
+        end
+        if Flags.FovChanger then
+            OriginalFov = OriginalFov or Camera.FieldOfView
+            Camera.FieldOfView = Flags.FovValue
+        elseif OriginalFov then
+            Camera.FieldOfView = OriginalFov
+            OriginalFov = nil
+        end
+    end)
 end
 
 do
