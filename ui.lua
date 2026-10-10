@@ -58,18 +58,18 @@ end
 local function hex(c) return format("%02X%02X%02X", to255(c.R), to255(c.G), to255(c.B)) end
 
 local Theme = {
-    head   = rgb( 30,  46,  72),
-    body   = rgb( 44,  46,  52),
-    panel  = rgb( 52,  55,  61),
-    field  = rgb( 64,  67,  74),
-    hover  = rgb( 74,  78,  86),
-    stroke = rgb( 18,  19,  22),
-    box    = rgb( 70,  74,  82),
-    grip   = rgb( 58,  61,  68),
-    accent = rgb(214, 178,  96),
-    white  = rgb(230, 230, 224),
-    dim    = rgb(160, 160, 156),
-    help   = rgb(150, 170, 200),
+    head   = rgb( 14,  22,  30),
+    body   = rgb( 18,  27,  36),
+    panel  = rgb( 22,  33,  44),
+    field  = rgb( 30,  44,  58),
+    hover  = rgb( 38,  55,  72),
+    stroke = rgb( 46,  70,  88),
+    box    = rgb( 36,  52,  68),
+    grip   = rgb( 28,  40,  54),
+    accent = rgb(110, 214, 222),
+    white  = rgb(214, 226, 232),
+    dim    = rgb(124, 146, 160),
+    help   = rgb(140, 170, 210),
     black  = rgb(  0,   0,   0),
 }
 
@@ -143,7 +143,7 @@ local function rescale(zoom)
 end
 
 local Fonts = (Drawing and Drawing.Fonts) or {}
-local FONT = Fonts.SystemBold or Fonts.System or 0
+local FONT = Fonts.Plex or Fonts.UI or Fonts.SystemBold or Fonts.System or 0
 
 local Can = { corner = false, center = false, font = false, sides = false, fontsize = false }
 if Drawing then
@@ -1462,9 +1462,12 @@ function Row.toggle(item, x, y, w, alpha, z)
     frame(bx, y, L.boxW, L.boxW, Theme.panel, mix(Theme.box, Theme.accent, max(lit, 0.45 * glow)),
         z, alpha)
     if lit > 0.02 then
-        local inset = (1 - lit) * (L.boxW / 2)
-        rect(bx + inset, y + inset, L.boxW - inset * 2, L.boxW - inset * 2,
-            Theme.accent, z + 2, L.r, lit * alpha)
+        local halo = px(3)
+        rect(bx - halo, y - halo, L.boxW + halo * 2, L.boxW + halo * 2,
+            Theme.accent, z + 2, L.r, 0.14 * lit * alpha)
+        local pip = (L.boxW - px(8)) * lit
+        local po = (L.boxW - pip) / 2
+        rect(bx + po, y + po, pip, pip, Theme.accent, z + 3, L.r, lit * alpha)
     end
 
     local tx = x + L.labelX
