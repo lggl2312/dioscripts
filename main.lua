@@ -617,7 +617,6 @@ do
         end })
 
     local OriginalFov
-    local FovCamera, FovWatch
     local function ApplyFov()
         local Camera = Workspace.CurrentCamera
         if not Camera then
@@ -625,32 +624,16 @@ do
         end
         if Flags.FovChanger then
             OriginalFov = OriginalFov or Camera.FieldOfView
-            -- Re-apply the moment the game writes a different FOV, so its writes never stick
-            if Camera ~= FovCamera then
-                FovCamera = Camera
-                if FovWatch then
-                    FovWatch:Disconnect()
-                end
-                pcall(function()
-                    FovWatch = Camera:GetPropertyChangedSignal("FieldOfView"):Connect(function()
-                        if Flags.FovChanger and Camera.FieldOfView ~= Flags.FovValue then
-                            Camera.FieldOfView = Flags.FovValue
-                        end
-                    end)
-                end)
-            end
-            if Camera.FieldOfView ~= Flags.FovValue then
-                Camera.FieldOfView = Flags.FovValue
-            end
+            Camera.FieldOfView = Flags.FovValue
         elseif OriginalFov then
             Camera.FieldOfView = OriginalFov
             OriginalFov = nil
         end
     end
 
-    -- Run after the game's camera update so its own FOV writes don't overwrite ours
+    -- Run at the last render priority so nothing else writes the FOV after us this frame
     local Bound = pcall(function()
-        RunService:BindToRenderStep("DioFov", Enum.RenderPriority.Camera.Value + 1, ApplyFov)
+        RunService:BindToRenderStep("DioFov", Enum.RenderPriority.Last.Value, ApplyFov)
     end)
     if not Bound then
         RunService.RenderStepped:Connect(ApplyFov)
