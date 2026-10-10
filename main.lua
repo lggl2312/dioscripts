@@ -617,7 +617,7 @@ do
         end })
 
     local OriginalFov
-    RunService.RenderStepped:Connect(function()
+    local function ApplyFov()
         local Camera = Workspace.CurrentCamera
         if not Camera then
             return
@@ -629,7 +629,12 @@ do
             Camera.FieldOfView = OriginalFov
             OriginalFov = nil
         end
-    end)
+    end
+
+    -- Run after the game's camera update so its own FOV writes don't overwrite ours
+    if not pcall(RunService.BindToRenderStep, RunService, "DioFov", Enum.RenderPriority.Camera.Value + 1, ApplyFov) then
+        RunService.RenderStepped:Connect(ApplyFov)
+    end
 end
 
 do
